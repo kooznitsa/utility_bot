@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "utility-bot"
+version = "0.1.0"
+description = ""
+authors = ["Julia Kuznetsova"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.103.2"
+uvicorn = {extras = ["standard"], version = "^0.23.2"}
+bs4 = "^0.0.1"
+googletrans = "3.1.0a0"
+sqlmodel = "^0.0.8"
+celery = "^5.3.4"
+redis = "^5.0.1"
+psycopg2 = "^2.9.9"
+asyncpg = "^0.28.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
