@@ -6,16 +6,17 @@ from sqlalchemy.orm import selectinload
 from database.errors import EntityDoesNotExist
 from repositories.base import BaseRepository
 from schemas.districts import District, DistrictCreate, DistrictRead
+from schemas.articles import Article
 
 
 class DistrictRepository(BaseRepository):
     model = District
 
-    async def create(self, model_id: int, district_create: DistrictCreate, parent_model) -> DistrictRead:
+    async def create(self, model_id: int, district_create: DistrictCreate) -> DistrictRead:
         model_query = await self.session.scalars(
-            select(parent_model)
-            .where(parent_model.id == model_id)
-            .options(selectinload(parent_model.districts))
+            select(Article)
+            .where(Article.id == model_id)
+            .options(selectinload(Article.districts))
         )
         if item := model_query.first():
             district_query = select(self.model).where(self.model.district == district_create.district)

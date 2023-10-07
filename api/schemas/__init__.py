@@ -1,4 +1,4 @@
-import schemas.link_schemas
+import schemas.articles
 import schemas.districts
 import schemas.tags
-import schemas.articles
+import schemas.link_schemas

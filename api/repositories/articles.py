@@ -4,9 +4,9 @@ from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
 from .base import BaseRepository
+from schemas.articles import Article, ArticleCreate, ArticleRead
 from schemas.tags import Tag
 from schemas.districts import District
-from schemas.articles import Article, ArticleCreate, ArticleRead
 
 
 class ArticleRepository(BaseRepository):
@@ -14,7 +14,9 @@ class ArticleRepository(BaseRepository):
 
     async def create(self, model_create: ArticleCreate) -> ArticleRead:
         model_query = select(self.model).where(self.model.url == model_create.url)
-        return await self._upsert(model_query, self.model, model_create)
+        result = await self._upsert(model_query, self.model, model_create)
+        await self._add_to_db(result)
+        return result
 
     async def list(
         self,
@@ -29,10 +31,7 @@ class ArticleRepository(BaseRepository):
         if district:
             query = query.where(self.model.districts.any(District.district.in_(district)))
         query = query.offset(offset).limit(limit)
-
-        results = await self.session.exec(
-            query.options(selectinload(self.model.tags).selectinload(self.model.districts))
-        )
+        results = await self.session.exec(query.options(selectinload('*')))
         return results.all()
 
     async def get(self, model_id: int) -> Optional[ArticleRead]:

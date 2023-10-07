@@ -16,6 +16,7 @@ class BaseRepository:
 
     async def get_list(self, query):
         results = await self.session.exec(query.options(selectinload('*')))
+        # return results.all()
         try:
             return results.scalars().all()
         except AttributeError:
@@ -27,8 +28,12 @@ class BaseRepository:
         await self.session.refresh(new_item)
 
     async def _upsert(self, query, model, model_create):
-        result = await self.session.exec(query)
-        result = result.scalars().first()
+        result = await self.session.execute(query)
+        # result = result.scalars().first()
+        try:
+            result = result.first()[0]
+        except AttributeError:
+            result = result.scalars().first()
         model_from_orm = model.from_orm(model_create)
 
         if result is None:

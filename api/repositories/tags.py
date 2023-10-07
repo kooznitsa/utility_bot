@@ -6,17 +6,19 @@ from sqlalchemy.orm import selectinload
 from database.errors import EntityDoesNotExist
 from repositories.base import BaseRepository
 from schemas.tags import Tag, TagCreate, TagRead
+from schemas.articles import Article
 
 
 class TagRepository(BaseRepository):
     model = Tag
 
-    async def create(self, model_id: int, tag_create: TagCreate, parent_model) -> TagRead:
+    async def create(self, model_id: int, tag_create: TagCreate) -> TagRead:
         model_query = await self.session.scalars(
-            select(parent_model)
-            .where(parent_model.id == model_id)
-            .options(selectinload(parent_model.tags))
+            select(Article)
+            .where(Article.id == model_id)
+            .options(selectinload('*'))
         )
+
         if item := model_query.first():
             tag_query = select(self.model).where(self.model.tag == tag_create.tag)
             new_tag = await self._upsert(tag_query, Tag, tag_create)

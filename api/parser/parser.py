@@ -6,6 +6,9 @@ from bs4 import BeautifulSoup
 from googletrans import Translator
 
 from .helpers import DISTRICTS, HEADERS, MONTHS
+from schemas.articles import ArticleCreate
+from schemas.tags import TagCreate
+from schemas.districts import DistrictCreate
 
 
 class Page:
@@ -67,34 +70,24 @@ class Article:
                 return pub_date + timedelta(days=7)
 
     def get_items(self):
-        return {
-            'url': self.url,
-            'title': self.TRANSLATOR.translate(self.title, dest='ru').text,
-            'content': self.TRANSLATOR.translate('\n'.join(self.content), dest='ru').text,
-            'pub_date': self.pub_date,
-            'deadline': self.get_deadline(self.pub_date, self.title)
-        }
+        return ArticleCreate(
+            title=self.TRANSLATOR.translate(self.title, dest='ru').text,
+            content=self.TRANSLATOR.translate('\n'.join(self.content), dest='ru').text,
+            deadline=self.get_deadline(self.pub_date, self.title),
+            url=self.url,
+            pub_date=self.pub_date,
+        )
 
     def get_tags(self):
         tags = self.container.find('div', {'class': 'meta-tags'}).find_all('a')
-        return [{'tag': tag.text} for tag in tags]
+        return [TagCreate(tag=tag.text) for tag in tags]
 
     def get_districts(self):
         tags = [i.get('tag') for i in self.get_tags()]
-        districts = [{'district': 'Нови Сад'}]
+        districts = [DistrictCreate(district='Нови Сад')]
 
         for word in [j for i in self.content for j in i.split()] + self.title.split() + tags:
             for start, full in DISTRICTS:
                 if word.startswith(start):
-                    districts.append({'district': full})
+                    districts.append(DistrictCreate(district=full))
         return districts
-
-
-if __name__ == '__main__':
-    page = Page('https://gradskeinfo.rs/kategorija/servisne-info/')
-
-    for i in page.get_urls():
-        article = Article(i)
-        print(article.get_items())
-        print(article.get_tags())
-        print(article.get_districts())
