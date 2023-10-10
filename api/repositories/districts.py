@@ -4,21 +4,21 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from database.errors import EntityDoesNotExist
-from repositories.base import BaseRepository
-from schemas.districts import District, DistrictCreate, DistrictRead
 from schemas.articles import Article
+from schemas.districts import District, DistrictCreate, DistrictRead
+from repositories.base import BaseRepository
 
 
 class DistrictRepository(BaseRepository):
     model = District
 
     async def create(self, model_id: int, district_create: DistrictCreate) -> DistrictRead:
-        model_query = await self.session.scalars(
+        model_query = await self.session.execute(
             select(Article)
             .where(Article.id == model_id)
             .options(selectinload(Article.districts))
         )
-        if item := model_query.first():
+        if item := model_query.scalars().first():
             district_query = select(self.model).where(self.model.district == district_create.district)
             new_district = await self._upsert(district_query, District, district_create)
             self.session.add(new_district)

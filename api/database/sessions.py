@@ -24,6 +24,7 @@ async_session = async_scoped_session(
     sessionmaker(
         async_engine,
         class_=AsyncSession,
+        expire_on_commit=False,
     ),
     scopefunc=current_task,
 )

@@ -15,12 +15,8 @@ class BaseRepository:
         return result.first()
 
     async def get_list(self, query):
-        results = await self.session.exec(query.options(selectinload('*')))
-        # return results.all()
-        try:
-            return results.scalars().all()
-        except AttributeError:
-            return results.all()
+        results = await self.session.execute(query.options(selectinload('*')))
+        return results.scalars().all()
 
     async def _add_to_db(self, new_item):
         self.session.add(new_item)
@@ -29,11 +25,8 @@ class BaseRepository:
 
     async def _upsert(self, query, model, model_create):
         result = await self.session.execute(query)
-        # result = result.scalars().first()
-        try:
-            result = result.first()[0]
-        except AttributeError:
-            result = result.scalars().first()
+        result = result.scalars().first()
+
         model_from_orm = model.from_orm(model_create)
 
         if result is None:
@@ -41,7 +34,6 @@ class BaseRepository:
 
         for k, v in model_from_orm.dict(exclude_unset=True).items():
             setattr(result, k, v)
-
         return result
 
     async def list(self, model, limit: int = 50, offset: int = 0):

@@ -5,29 +5,57 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from database.sessions import async_engine
 from parser.parser import Page, Article
 from repositories.articles import ArticleRepository
-from repositories.tags import TagRepository
 from repositories.districts import DistrictRepository
 
 
-async def add_articles() -> None:
-    async with AsyncSession(async_engine) as async_session:
-        article_repo = ArticleRepository(async_session)
-        tag_repo = TagRepository(async_session)
-        district_repo = DistrictRepository(async_session)
+class ItemIterator:
+    def __init__(self, items):
+        self._items = iter(items)
 
-        page = Page('https://gradskeinfo.rs/kategorija/servisne-info/')
+    def __aiter__(self):
+        return self
 
-        for i in page.get_urls():
-            article = Article(i)
-            article_created = await article_repo.create(article.get_items())
-            print(f'Article ID={article_created.id} items added to database')
+    async def __anext__(self):
+        try:
+            item = next(self._items)
+        except StopIteration:
+            raise StopAsyncIteration
+        return item
 
-            for tag in article.get_tags():
-                await tag_repo.create(article_created.id, tag)
-            print('Tags added to database')
 
-            for district in article.get_districts():
-                await district_repo.create(article_created.id, district)
-            print('Districts added to database')
+class ArticleIterator:
+    def __init__(self, urls):
+        self._urls = iter(urls)
 
-            sleep(3)
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            url = next(self._urls)
+        except StopIteration:
+            raise StopAsyncIteration
+
+        async with AsyncSession(async_engine) as async_session:
+            article_repo = ArticleRepository(async_session)
+            district_repo = DistrictRepository(async_session)
+
+            article = Article(url)
+            if article_created := await article_repo.create(article.get_items()):
+                article_id = article_created.id
+
+                async for district in ItemIterator(article.get_districts()):
+                    await district_repo.create(article_id, district)
+
+                return article_id
+
+
+async def add_articles():
+    page = Page('https://gradskeinfo.rs/kategorija/servisne-info/')
+
+    async for article_id in ArticleIterator(page.get_urls()):
+        if article_id:
+            print(f'Article ID={article_id} added to database')
+        else:
+            print('Article already in database')
+        sleep(3)

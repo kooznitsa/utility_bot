@@ -31,14 +31,12 @@ async def create_article(
     name='get_articles',
 )
 async def get_articles(
-    tag: Optional[list[str]] = Query(default=None),
     district: Optional[list[str]] = Query(default=None),
     limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
     repository: ArticleRepository = Depends(get_repository(ArticleRepository))
 ) -> list[Optional[ArticleRead]]:
     return await repository.list(
-        tag=tag,
         district=district,
         limit=limit,
         offset=offset,

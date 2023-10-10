@@ -7,7 +7,6 @@ from googletrans import Translator
 
 from .helpers import DISTRICTS, HEADERS, MONTHS
 from schemas.articles import ArticleCreate
-from schemas.tags import TagCreate
 from schemas.districts import DistrictCreate
 
 
@@ -78,13 +77,9 @@ class Article:
             pub_date=self.pub_date,
         )
 
-    def get_tags(self):
-        tags = self.container.find('div', {'class': 'meta-tags'}).find_all('a')
-        return [TagCreate(tag=tag.text) for tag in tags]
-
     def get_districts(self):
-        tags = [i.get('tag') for i in self.get_tags()]
-        districts = [DistrictCreate(district='Нови Сад')]
+        tags = [i.text for i in self.container.find('div', {'class': 'meta-tags'}).find_all('a')]
+        districts = []
 
         for word in [j for i in self.content for j in i.split()] + self.title.split() + tags:
             for start, full in DISTRICTS:
