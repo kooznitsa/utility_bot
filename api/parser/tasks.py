@@ -23,7 +23,7 @@ celery_app.conf.update(
     beat_schedule={
         'send-messages-scheduled-task': {
             'task': 'parser.tasks.scrape_articles',
-            'schedule': crontab(minute='*/1')
+            'schedule': crontab(minute='*/60')
         }
     },
     task_routes={

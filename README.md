@@ -6,16 +6,16 @@
 
 ## Commands
 
-1. Create network: ```docker network create my-net```
+- Docker:
+  - Create network: ```docker network create my-net```
+  - Build Docker containers: ```docker-compose up -d --build```
+  - Remove Docker containers: ```docker-compose down```
+  - Bring down the existing containers and volumes: ```docker-compose down -v```
 
-2. Start Redis server: ```redis-server --save 20 1 --loglevel warning```
+- Alembic:
+  - Initialize Alembic: ```docker exec -it fastapi_service poetry run alembic init -t async migrations```
+  - Generate a migration file: ```docker exec -it fastapi_service poetry run alembic revision --autogenerate -m "init"```
+  - Apply the migration: ```docker exec -it fastapi_service poetry run alembic upgrade head```
 
-3. Launch Celery tasks: ```poetry run celery -A parser.tasks worker --beat -l info -Q main-queue -c 1```
-
-4. Launch Uvicorn: ```uvicorn main:app --reload```
-
-5. Build Docker containers: ```docker-compose up -d --build```
-
-6. Remove Docker containers: ```docker-compose down```
-
-Commands 2–4: if not using Docker.
+- Database:
+  - Display a table: ```docker exec -it db_postgres psql -U postgres utility_db -c "SELECT * FROM public.articles"```
