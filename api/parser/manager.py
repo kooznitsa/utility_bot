@@ -43,3 +43,9 @@ async def add_articles():
             else:
                 print('Article already in database')
             sleep(3)
+
+
+async def delete_articles():
+    async with AsyncSession(async_engine) as async_session:
+        article_repo = ArticleRepository(async_session)
+        await article_repo.delete_bunch()

@@ -7,7 +7,7 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-from .add_articles import add_articles
+from .manager import add_articles, delete_articles
 
 load_dotenv()
 
@@ -21,13 +21,18 @@ celery_app.conf.update(
     accept_content=['application/json'],
     result_serializer='json',
     beat_schedule={
-        'send-messages-scheduled-task': {
+        'scrape-articles-scheduled-task': {
             'task': 'parser.tasks.scrape_articles',
-            'schedule': crontab(minute='*/60')
+            'schedule': crontab(minute=0, hour='*/3,8-19')
+        },
+        'remove-articles-scheduled-task': {
+            'task': 'parser.tasks.remove_articles',
+            'schedule': crontab(hour='*/23')
         }
     },
     task_routes={
         'parser.tasks.scrape_articles': 'main-queue',
+        'parser.tasks.remove_articles': 'main-queue',
     },
 )
 
@@ -35,3 +40,8 @@ celery_app.conf.update(
 @celery_app.task
 def scrape_articles():
     asyncio.get_event_loop().run_until_complete(add_articles())
+
+
+@celery_app.task
+def remove_articles():
+    asyncio.get_event_loop().run_until_complete(delete_articles())

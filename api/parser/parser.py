@@ -53,6 +53,7 @@ class Article:
 
     @staticmethod
     def get_deadline(pub_date, title):
+        title = title.lower()
         try:
             pattern = r'[0-9]{1,2}\.[ \n\t]' + f'({"|".join(MONTHS)})'
             day, month = re.search(pattern, title).group(0).split()

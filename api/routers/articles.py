@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from database.errors import EntityDoesNotExist
 from database.sessions import get_repository
@@ -9,19 +9,6 @@ from schemas.articles import Article, ArticleCreate, ArticleRead
 
 
 router = APIRouter(prefix='/articles')
-
-
-@router.post(
-    '/',
-    response_model=ArticleRead,
-    status_code=status.HTTP_201_CREATED,
-    name='create_article',
-)
-async def create_article(
-    article_create: ArticleCreate = Body(...),
-    repository: ArticleRepository = Depends(get_repository(ArticleRepository)),
-) -> ArticleRead:
-    return await repository.create(model_create=article_create)
 
 
 @router.get(

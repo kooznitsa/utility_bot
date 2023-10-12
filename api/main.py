@@ -1,10 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import SQLModel
 
-import schemas
 from database.config import settings
-from database.sessions import engine
 from routers import articles
 
 app = FastAPI(
@@ -34,13 +31,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-
-
-# @app.on_event('startup')
-# async def init_tables():
-#     # Disable function if Celery launched
-#     SQLModel.metadata.drop_all(engine)
-#     SQLModel.metadata.create_all(engine)
 
 
 @app.get('/')
