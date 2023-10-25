@@ -5,7 +5,7 @@ from urllib.request import urlopen, Request
 from bs4 import BeautifulSoup
 from googletrans import Translator
 
-from .helpers import DISTRICTS, HEADERS, MONTHS
+from api.utils.helpers import DISTRICTS, HEADERS, MONTHS
 from schemas.articles import ArticleCreate
 from schemas.districts import DistrictCreate
 
