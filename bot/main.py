@@ -3,8 +3,8 @@ import logging
 
 from aiogram import Bot, Dispatcher
 
-from config import settings
-from handlers import districts
+from config_data.config import settings
+from handlers import district_handlers
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,7 +12,8 @@ logging.basicConfig(level=logging.INFO)
 async def main():
     bot = Bot(token=settings.bot_token)
     dp = Dispatcher()
-    dp.include_routers(districts.router)
+
+    dp.include_routers(district_handlers.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)

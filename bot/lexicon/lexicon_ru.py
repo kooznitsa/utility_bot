@@ -2,7 +2,7 @@ from enum import Enum, unique
 
 
 @unique
-class Commands(Enum):
+class LexiconRu(Enum):
     START = 'Выберите район(-ы):'
     ADD = 'Добавлено!'
     REMOVE = 'Удалено!'

@@ -1,18 +1,18 @@
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.filters import CommandStart
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
 from keyboards.district_keyboard import get_keyboard, reset_keyboard
+from lexicon.lexicon_ru import LexiconRu
 from users.users import users
 from utils.btn_callback_factory import BtnCallbackFactory
-from utils.commands import Commands
 from utils.districts import DISTRICTS
 
 router = Router()
 
 
-@router.message(CommandStart())
+@router.message(Command(commands=['start', 'help']))
 async def process_start_command(message: Message):
     if message.from_user.id not in users:
         users[message.from_user.id] = {}
@@ -20,7 +20,7 @@ async def process_start_command(message: Message):
     reset_keyboard(message.from_user.id)
 
     await message.answer(
-        text=Commands.START.value,
+        text=LexiconRu.START.value,
         reply_markup=get_keyboard(message.from_user.id),
     )
 
@@ -33,15 +33,15 @@ async def process_choose_callback(
     btn = users[callback.from_user.id]['btn']
 
     if btn[callback_data.idx] == 0:
-        answer = Commands.ADD.value
+        answer = LexiconRu.ADD.value
         btn[callback_data.idx] = 1
     else:
-        answer = Commands.REMOVE.value
+        answer = LexiconRu.REMOVE.value
         btn[callback_data.idx] = 0
 
     try:
         await callback.message.edit_text(
-            text=Commands.ADD_MORE.value,
+            text=LexiconRu.ADD_MORE.value,
             reply_markup=get_keyboard(callback.from_user.id)
         )
     except TelegramBadRequest:
@@ -56,7 +56,7 @@ async def process_finish_callback(callback: CallbackQuery):
     districts = [DISTRICTS[idx] for idx, btn in enumerate(btns) if btn == 1]
 
     await callback.answer(
-        text=f"{Commands.RESULT.value} {', '.join(districts)}",
+        text=f"{LexiconRu.RESULT.value} {', '.join(districts)}",
         show_alert=True,
     )
 
@@ -67,7 +67,7 @@ async def process_reset_callback(callback: CallbackQuery):
 
     try:
         await callback.message.edit_text(
-            text=Commands.START.value,
+            text=LexiconRu.START.value,
             reply_markup=get_keyboard(callback.from_user.id)
         )
     except TelegramBadRequest:

@@ -6,6 +6,7 @@ from database.sessions import async_engine
 from parser.parser import Page, Article
 from repositories.articles import ArticleRepository
 from repositories.districts import DistrictRepository
+from schemas.articles import Article as ArticleSchema
 
 
 class AsyncItemIterator:
@@ -37,7 +38,7 @@ async def add_articles():
                 article_id = article_created.id
 
                 async for district in AsyncItemIterator(article.get_districts()):
-                    await district_repo.create(article_id, district)
+                    await district_repo.create(article_id, district, ArticleSchema)
 
                 print(f'Article ID={article_id} added to database')
             else:

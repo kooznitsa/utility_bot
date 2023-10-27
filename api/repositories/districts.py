@@ -4,7 +4,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from database.errors import EntityDoesNotExist
-from schemas.articles import Article
 from schemas.districts import District, DistrictCreate, DistrictRead
 from repositories.base import BaseRepository
 
@@ -12,11 +11,11 @@ from repositories.base import BaseRepository
 class DistrictRepository(BaseRepository):
     model = District
 
-    async def create(self, model_id: int, district_create: DistrictCreate) -> DistrictRead:
+    async def create(self, model_id: int, district_create: DistrictCreate, parent_model) -> DistrictRead:
         model_query = await self.session.execute(
-            select(Article)
-            .where(Article.id == model_id)
-            .options(selectinload(Article.districts))
+            select(parent_model)
+            .where(parent_model.id == model_id)
+            .options(selectinload(parent_model.districts))
         )
         if item := model_query.scalars().first():
             district_query = select(self.model).where(self.model.district == district_create.district)

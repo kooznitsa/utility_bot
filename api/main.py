@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database.config import settings
-from routers import articles
+from routers import articles, users
 
 app = FastAPI(
     title=settings.title,
@@ -17,6 +17,11 @@ app.include_router(
     articles.router,
     prefix=settings.api_prefix,
     tags=['Articles'],
+)
+app.include_router(
+    users.router,
+    prefix=settings.api_prefix,
+    tags=['Users'],
 )
 
 origins = [
