@@ -11,10 +11,10 @@ from utils.districts import DISTRICTS
 def get_keyboard(user_id: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for k, v in DISTRICTS.items():
+    for idx, name in DISTRICTS.items():
         builder.button(
-            text=f"{CHECKBOXES[users[user_id]['btn'][k]]} {v['name']}",
-            callback_data=BtnCallbackFactory(action='choose', idx=k, name=v['name']),
+            text=f"{CHECKBOXES[users[user_id]['btn'][idx]]} {name}",
+            callback_data=BtnCallbackFactory(action='choose', idx=idx, name=name),
         )
 
     builder.button(

@@ -3,7 +3,7 @@ from enum import Enum, unique
 
 @unique
 class LexiconRu(Enum):
-    START = 'Выберите район(-ы):'
+    START = 'Выберите район(-ы)'
     ADD = 'Добавлено!'
     REMOVE = 'Удалено!'
     ADD_MORE = 'Вы можете добавить больше районов'
