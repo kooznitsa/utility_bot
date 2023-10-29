@@ -1,5 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardButton
 
 from .checkboxes import CHECKBOXES
 from lexicon.lexicon_ru import LexiconRu
@@ -8,26 +8,35 @@ from utils.btn_callback_factory import BtnCallbackFactory
 from utils.districts import DISTRICTS
 
 
+NUM_OF_COLS = 2
+
+
 def get_keyboard(user_id: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    for idx, name in DISTRICTS.items():
-        builder.button(
+    buttons = [
+        InlineKeyboardButton(
             text=f"{CHECKBOXES[users[user_id]['btn'][idx]]} {name}",
-            callback_data=BtnCallbackFactory(action='choose', idx=idx, name=name),
+            callback_data=BtnCallbackFactory(action='choose', idx=idx, name=name).pack(),
         )
+        for idx, name in DISTRICTS.items()
+    ]
 
-    builder.button(
-        text=LexiconRu.CONFIRM.value,
-        callback_data=BtnCallbackFactory(action='finish'),
+    builder.row(*buttons, width=NUM_OF_COLS)
+
+    builder.row(
+        InlineKeyboardButton(
+            text=LexiconRu.CONFIRM.value,
+            callback_data=BtnCallbackFactory(action='finish').pack(),
+        )
     )
 
-    builder.button(
-        text=LexiconRu.RESET.value,
-        callback_data=BtnCallbackFactory(action='reset'),
+    builder.row(
+        InlineKeyboardButton(
+            text=LexiconRu.RESET.value,
+            callback_data=BtnCallbackFactory(action='reset').pack(),
+        )
     )
-
-    builder.adjust(2)
 
     return builder.as_markup(resize_keyboard=True)
 

@@ -30,6 +30,11 @@ async def process_choose_callback(
     callback: CallbackQuery,
     callback_data: BtnCallbackFactory,
 ):
+    # callback_data.pack() возвратит коллбэк в виде строки
+    # callback_data.unpack() возвратит коллбэк в виде объекта BtnCallbackFactory
+    # callback_data.idx: district index
+    # callback_data.name: district name
+
     btn = users[callback.from_user.id]['btn']
 
     if btn[callback_data.idx] == 0:
