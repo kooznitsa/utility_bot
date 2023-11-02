@@ -25,7 +25,7 @@ class UserRepository(BaseRepository):
         else:
             raise EntityAlreadyExists
 
-    async def list(
+    async def list_users(
         self,
         limit: int = 50,
         district: Optional[list[str]] = None,
@@ -54,7 +54,7 @@ class UserRepository(BaseRepository):
         else:
             raise EntityDoesNotExist
 
-    async def list_articles(self, model_id: int) -> list[ArticleRead]:
+    async def list_articles(self, model_id: int) -> list[Optional[ArticleRead]] | None:
         user_query = select(self.model).where(self.model.user_id == model_id)
 
         if instance := await self.session.execute(user_query.options(selectinload('*'))):

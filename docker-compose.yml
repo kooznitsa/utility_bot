@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     hostname: fastapi_service
     container_name: fastapi_service
+    restart: always
     depends_on:
       - db_postgres
     ports:
@@ -58,6 +59,23 @@ services:
       command: 'poetry run celery -A parser.tasks worker --beat -l info -Q main-queue -c 1'
       networks:
         - my-net
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    depends_on:
+      - db_postgres
+      - redis
+    hostname: bot
+    container_name: bot
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./bot:/home/app
+    networks:
+      - my-net
 
 volumes:
   db-postgres:

@@ -12,3 +12,5 @@ RUN pip install poetry
 RUN poetry install
 
 COPY . ./
+
+CMD ["poetry", "run", "python3", "main.py"]

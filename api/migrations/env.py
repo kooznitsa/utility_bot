@@ -10,6 +10,7 @@ from alembic import context
 
 from database.config import settings
 from schemas.articles import Article
+import schemas.users
 from schemas.districts import District
 from schemas.link_schemas import ArticleDistrict
 

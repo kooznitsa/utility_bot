@@ -1,53 +1,83 @@
 from aiogram import F, Router
 from aiogram.exceptions import TelegramBadRequest
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
-from keyboards.district_keyboard import get_keyboard, reset_keyboard
+from keyboards.callback_factory import BtnCallbackFactory
+from keyboards.district_keyboard import get_keyboard
+from lexicon.districts import DISTRICTS
 from lexicon.lexicon_ru import LexiconRu
-from users.users import users
-from utils.btn_callback_factory import BtnCallbackFactory
-from utils.districts import DISTRICTS
+from schemas.schemas import UserCreate, DistrictCreate
 
 router = Router()
 
 
-@router.message(Command(commands=['start', 'help']))
-async def process_start_command(message: Message):
-    if message.from_user.id not in users:
-        users[message.from_user.id] = {}
+class FSMDistrict(StatesGroup):
+    buttons = State()
 
-    reset_keyboard(message.from_user.id)
 
+async def reset_buttons(state: FSMContext) -> list[int]:
+    data = await state.get_data()
+    buttons = [0] * len(DISTRICTS)
+    data['buttons'] = buttons
+    await state.set_data(data)
+    return buttons
+
+
+@router.message(Command(commands='help'))
+async def process_help_command(message: Message) -> None:
     await message.answer(
-        text=LexiconRu.START.value,
-        reply_markup=get_keyboard(message.from_user.id),
+        text=LexiconRu.HELP_DESC.value,
     )
 
 
-@router.callback_query(BtnCallbackFactory.filter(F.action == 'choose'))
+@router.message(Command(commands='start'))
+async def process_start_command(message: Message, state: FSMContext) -> None:
+    await state.set_state(FSMDistrict.buttons)
+
+    buttons = await reset_buttons(state)
+
+    user = UserCreate(
+        user_id=message.from_user.id,
+        first_name=message.from_user.first_name,
+        last_name=message.from_user.last_name,
+        username=message.from_user.username,
+    )
+    # TODO: send user to API create_user
+
+    await message.answer(
+        text=LexiconRu.START.value,
+        reply_markup=get_keyboard(buttons),
+    )
+
+
+@router.callback_query(
+    BtnCallbackFactory.filter(F.action == 'choose'),
+    StateFilter(FSMDistrict.buttons),
+)
 async def process_choose_callback(
     callback: CallbackQuery,
     callback_data: BtnCallbackFactory,
-):
-    # callback_data.pack() возвратит коллбэк в виде строки
-    # callback_data.unpack() возвратит коллбэк в виде объекта BtnCallbackFactory
-    # callback_data.idx: district index
-    # callback_data.name: district name
+    state: FSMContext,
+) -> None:
+    user_data = await state.get_data()
+    buttons = user_data.get('buttons')
 
-    btn = users[callback.from_user.id]['btn']
-
-    if btn[callback_data.idx] == 0:
+    if buttons[callback_data.idx] == 0:
         answer = LexiconRu.ADD.value
-        btn[callback_data.idx] = 1
+        buttons[callback_data.idx] = 1
     else:
         answer = LexiconRu.REMOVE.value
-        btn[callback_data.idx] = 0
+        buttons[callback_data.idx] = 0
+
+    await state.update_data(buttons=buttons)
 
     try:
         await callback.message.edit_text(
             text=LexiconRu.ADD_MORE.value,
-            reply_markup=get_keyboard(callback.from_user.id)
+            reply_markup=get_keyboard(buttons)
         )
     except TelegramBadRequest:
         pass
@@ -56,9 +86,15 @@ async def process_choose_callback(
 
 
 @router.callback_query(BtnCallbackFactory.filter(F.action == 'finish'))
-async def process_finish_callback(callback: CallbackQuery):
-    btns = users[callback.from_user.id]['btn']
-    districts = [DISTRICTS[idx] for idx, btn in enumerate(btns) if btn == 1]
+async def process_finish_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    user_data = await state.get_data()
+    districts = [
+        DISTRICTS[idx]
+        for idx, status in enumerate(user_data['buttons']) if status == 1
+    ]
+    # TODO: send districts with user ID to API
+
+    await state.clear()
 
     await callback.answer(
         text=f"{LexiconRu.RESULT.value} {', '.join(districts)}",
@@ -67,13 +103,16 @@ async def process_finish_callback(callback: CallbackQuery):
 
 
 @router.callback_query(BtnCallbackFactory.filter(F.action == 'reset'))
-async def process_reset_callback(callback: CallbackQuery):
-    reset_keyboard(callback.from_user.id)
+async def process_reset_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    buttons = await reset_buttons(state)
 
     try:
         await callback.message.edit_text(
             text=LexiconRu.START.value,
-            reply_markup=get_keyboard(callback.from_user.id)
+            reply_markup=get_keyboard(buttons)
         )
     except TelegramBadRequest:
         pass
+
+    await state.clear()
+    await callback.answer()

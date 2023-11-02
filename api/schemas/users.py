@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy import UniqueConstraint
 from sqlmodel import SQLModel, Field, Relationship
 
-from .link_schemas import UserDistrict
 from .districts import DistrictRead
+from .link_schemas import UserDistrict
 if TYPE_CHECKING:
     from .districts import District
 
@@ -17,12 +17,12 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    __tablename__ = 'users'
+    __tablename__ = 'schemas'
     __table_args__ = (UniqueConstraint('user_id'),)
 
     id: int | None = Field(primary_key=True, default=None)
 
-    districts: list['District'] = Relationship(back_populates='users', link_model=UserDistrict)
+    districts: list['District'] = Relationship(back_populates='schemas', link_model=UserDistrict)
 
 
 class UserCreate(UserBase):

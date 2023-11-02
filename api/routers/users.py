@@ -11,7 +11,7 @@ from schemas.articles import ArticleRead
 from schemas.districts import DistrictRead, DistrictCreate
 
 
-router = APIRouter(prefix='/users')
+router = APIRouter(prefix='/schemas')
 
 
 @router.post(
@@ -45,7 +45,7 @@ async def get_users(
     offset: int = Query(default=0),
     repository: UserRepository = Depends(get_repository(UserRepository))
 ) -> list[Optional[UserRead]]:
-    return await repository.list(
+    return await repository.list_users(
         district=district,
         limit=limit,
         offset=offset,

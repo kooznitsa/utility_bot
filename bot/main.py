@@ -2,6 +2,8 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.redis import RedisStorage
+import aioredis
 
 from config_data.config import settings
 from handlers import district_handlers
@@ -12,7 +14,11 @@ logging.basicConfig(level=logging.INFO)
 
 async def main():
     bot = Bot(token=settings.bot_token)
-    dp = Dispatcher()
+
+    redis = await aioredis.from_url(settings.redis_url, db=5)
+    storage: RedisStorage = RedisStorage(redis=redis)
+
+    dp: Dispatcher = Dispatcher(storage=storage)
 
     dp.include_routers(district_handlers.router)
 
