@@ -11,6 +11,7 @@ aiogram = "^3.1.1"
 pydantic-settings = "^2.0.3"
 aioredis = "^2.0.1"
 redis = "^5.0.1"
+telethon = "^1.32.0"
 
 
 [build-system]

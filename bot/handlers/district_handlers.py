@@ -10,6 +10,8 @@ from keyboards.district_keyboard import get_keyboard
 from lexicon.districts import DISTRICTS
 from lexicon.lexicon_ru import LexiconRu
 from schemas.schemas import UserCreate, DistrictCreate
+from receiver.driver import GatewayAPIDriver
+from utils.async_items import AsyncItems
 
 router = Router()
 
@@ -45,7 +47,8 @@ async def process_start_command(message: Message, state: FSMContext) -> None:
         last_name=message.from_user.last_name,
         username=message.from_user.username,
     )
-    # TODO: send user to API create_user
+
+    await GatewayAPIDriver.tg_user_create(user)
 
     await message.answer(
         text=LexiconRu.START.value,
@@ -92,7 +95,14 @@ async def process_finish_callback(callback: CallbackQuery, state: FSMContext) ->
         DISTRICTS[idx]
         for idx, status in enumerate(user_data['buttons']) if status == 1
     ]
-    # TODO: send districts with user ID to API
+
+    # TODO: clear all existing user districts
+
+    async for district in AsyncItems(districts):
+        await GatewayAPIDriver.tg_district_create(
+            callback.from_user.id,
+            DistrictCreate(district),
+        )
 
     await state.clear()
 

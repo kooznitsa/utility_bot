@@ -1,7 +1,9 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.security.api_key import APIKey
 
+from .protected import get_api_key
 from database.errors import EntityDoesNotExist
 from database.sessions import get_repository
 from repositories.articles import ArticleRepository
@@ -21,7 +23,8 @@ async def get_articles(
     district: Optional[list[str]] = Query(default=None),
     limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
-    repository: ArticleRepository = Depends(get_repository(ArticleRepository))
+    repository: ArticleRepository = Depends(get_repository(ArticleRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> list[Optional[ArticleRead]]:
     return await repository.list(
         district=district,
@@ -39,6 +42,7 @@ async def get_articles(
 async def get_article(
     article_id: int,
     repository: ArticleRepository = Depends(get_repository(ArticleRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> ArticleRead:
     try:
         result = await repository.get(model_id=article_id)
@@ -58,6 +62,7 @@ async def get_article(
 async def delete_article(
     article_id: int,
     repository: ArticleRepository = Depends(get_repository(ArticleRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> None:
     try:
         await repository.get(model_id=article_id)

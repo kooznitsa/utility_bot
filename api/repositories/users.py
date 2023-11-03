@@ -7,11 +7,15 @@ from .base import BaseRepository
 from database.errors import EntityDoesNotExist, EntityAlreadyExists
 from schemas.users import User, UserCreate, UserRead
 from schemas.districts import District
-from schemas.articles import Article, ArticleRead
 
 
 class UserRepository(BaseRepository):
     model = User
+
+    async def _get_user(self, model_id: int):
+        query = select(self.model).where(self.model.user_id == model_id)
+        result = await self.session.scalars(query.options(selectinload('*')))
+        return result.first()
 
     async def create(self, model_create: UserCreate) -> UserRead:
         model_query = await self.session.execute(
@@ -41,32 +45,18 @@ class UserRepository(BaseRepository):
         return results.scalars().all()
 
     async def get(self, model_id: int) -> Optional[UserRead]:
-        return await super().get(self.model, model_id)
+        if item := await self._get_user(model_id):
+            return item
+        else:
+            raise EntityDoesNotExist
 
     async def delete_district(self, model_id: int, district_id: int) -> Optional[UserRead]:
         district_to_delete = await self._get_instance(District, district_id)
-        instance = await self._get_instance(self.model, model_id)
+        instance = await self._get_user(model_id)
 
         if instance and (district_to_delete in instance.districts):
             instance.districts.remove(district_to_delete)
             await self._add_to_db(instance)
             return instance
-        else:
-            raise EntityDoesNotExist
-
-    async def list_articles(self, model_id: int) -> list[Optional[ArticleRead]] | None:
-        user_query = select(self.model).where(self.model.user_id == model_id)
-
-        if instance := await self.session.execute(user_query.options(selectinload('*'))):
-            instance = instance.scalars().first()
-
-            articles_query = (
-                select(Article)
-                .where(Article.districts.any(District.district.in_(instance.districts)))
-            )
-
-            results = await self.session.execute(articles_query.options(selectinload('*')))
-            return results.scalars().all()
-
         else:
             raise EntityDoesNotExist

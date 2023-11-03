@@ -1,7 +1,9 @@
 from typing import Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi.security.api_key import APIKey
 
+from .protected import get_api_key
 from database.errors import EntityDoesNotExist, EntityAlreadyExists
 from database.sessions import get_repository
 from repositories.users import UserRepository
@@ -11,7 +13,7 @@ from schemas.articles import ArticleRead
 from schemas.districts import DistrictRead, DistrictCreate
 
 
-router = APIRouter(prefix='/schemas')
+router = APIRouter(prefix='/users')
 
 
 @router.post(
@@ -23,6 +25,7 @@ router = APIRouter(prefix='/schemas')
 async def create_user(
     user_create: UserCreate = Body(...),
     repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
         return await repository.create(model_create=user_create)
@@ -43,7 +46,8 @@ async def get_users(
     district: Optional[list[str]] = Query(default=None),
     limit: int = Query(default=50, lte=100),
     offset: int = Query(default=0),
-    repository: UserRepository = Depends(get_repository(UserRepository))
+    repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> list[Optional[UserRead]]:
     return await repository.list_users(
         district=district,
@@ -61,6 +65,7 @@ async def get_users(
 async def get_user(
     user_id: int,
     repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
         result = await repository.get(model_id=user_id)
@@ -80,6 +85,7 @@ async def get_user(
 async def delete_user(
     user_id: int,
     repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> None:
     try:
         await repository.get(model_id=user_id)
@@ -101,6 +107,7 @@ async def create_user_district(
     user_id: int,
     district_create: DistrictCreate = Body(...),
     repository: DistrictRepository = Depends(get_repository(DistrictRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> DistrictRead:
     try:
         return await repository.create(
@@ -123,6 +130,7 @@ async def delete_user_district(
     user_id: int,
     district_id: int,
     repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
         return await repository.delete_district(
@@ -132,23 +140,4 @@ async def delete_user_district(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'User or district not found'
-        )
-
-
-@router.get(
-    '/{user_id}/articles',
-    response_model=ArticleRead,
-    status_code=status.HTTP_200_OK,
-    name='get_user_articles',
-)
-async def get_user_articles(
-    user_id: int,
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-) -> list[Optional[ArticleRead]]:
-    try:
-        return await repository.list_articles(model_id=user_id)
-    except EntityDoesNotExist:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User not found'
         )

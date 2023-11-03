@@ -15,6 +15,7 @@ class Settings(BaseConfig):
     redoc_url: str = '/redoc'
     openapi_url: str = '/openapi.json'
     api_prefix: str = '/api'
+    gw_api_key: str = os.environ.get('GW_API_KEY')
     debug: bool = os.environ.get('DEBUG')
     postgres_user: str = os.environ.get('POSTGRES_USER')
     postgres_password: str = os.environ.get('POSTGRES_PASSWORD')

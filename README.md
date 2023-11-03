@@ -4,6 +4,23 @@
 
 ![Database structure](https://raw.githubusercontent.com/kooznitsa/utility_bot/main/api/database/db_diagram.png)
 
+## Endpoints
+
+| Method      | Endpoint                     | Description                 |
+|-------------|------------------------------|-----------------------------|
+| ---GENERAL  | /	                           |                             |
+| GET	        | /	                           | Root                        |
+| GET	        | /docs	                       | Documentation               |
+| ---ARTICLES | /api/articles                | Articles                    | 
+| GET         | /                            | Get all articles            |
+| GET         | ?district={d1}&district={d2} | Get articles with districts |
+| POST        | /                            | Create an article           |
+| DELETE      | /{article_id}                | Delete an article           |
+| ---USERS	   | /api/users                   | Users                       |
+| POST	       | / 	                          | Create a user               |
+| POST	       | /{user_id}/districts	        | Create a user district      |
+| DELETE	    | /{user_id}districts	         | Delete all user districts   |
+
 ## Commands
 
 - Docker:
