@@ -1,7 +1,8 @@
-import httpx
 import logging
 from typing import Optional, Union
 from json import JSONDecodeError
+
+import httpx
 
 from .logger import gateway_api_driver_logger_init
 from config_data.config import settings

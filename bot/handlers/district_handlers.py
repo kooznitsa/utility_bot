@@ -12,6 +12,7 @@ from lexicon.lexicon_ru import LexiconRu
 from schemas.schemas import UserCreate, DistrictCreate
 from receiver.driver import GatewayAPIDriver
 from utils.async_items import AsyncItems
+from utils.get_data import get_data
 
 router = Router()
 
@@ -126,3 +127,9 @@ async def process_reset_callback(callback: CallbackQuery, state: FSMContext) -> 
 
     await state.clear()
     await callback.answer()
+
+
+@router.message()
+async def send_articles(message: Message):
+    if data := get_data(message.from_user.id):
+        await message.answer(text=data)

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import UniqueConstraint
@@ -16,6 +16,7 @@ class ArticleBase(SQLModel):
     content: str
     pub_date: date = Field(index=True)
     deadline: date = Field(index=True)
+    created_at: datetime = datetime.now()
 
 
 class Article(ArticleBase, table=True):

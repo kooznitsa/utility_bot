@@ -141,3 +141,23 @@ async def delete_user_district(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f'User or district not found'
         )
+
+
+@router.get(
+    '/{user_id}/articles',
+    response_model=ArticleRead,
+    status_code=status.HTTP_200_OK,
+    name='get_user_articles',
+)
+async def get_user_articles(
+    user_id: int,
+    repository: UserRepository = Depends(get_repository(UserRepository)),
+    api_key: APIKey = Depends(get_api_key),
+) -> list[Optional[ArticleRead]]:
+    try:
+        return await repository.list_articles(model_id=user_id)
+    except EntityDoesNotExist:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User not found'
+        )

@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy.orm import selectinload
@@ -7,6 +8,7 @@ from .base import BaseRepository
 from database.errors import EntityDoesNotExist, EntityAlreadyExists
 from schemas.users import User, UserCreate, UserRead
 from schemas.districts import District
+from schemas.articles import Article, ArticleRead
 
 
 class UserRepository(BaseRepository):
@@ -58,5 +60,25 @@ class UserRepository(BaseRepository):
             instance.districts.remove(district_to_delete)
             await self._add_to_db(instance)
             return instance
+        else:
+            raise EntityDoesNotExist
+
+    async def list_articles(self, model_id: int) -> list[ArticleRead]:
+        user_query = select(self.model).where(self.model.user_id == model_id)
+
+        if instance := await self.session.execute(user_query.options(selectinload('*'))):
+            instance = instance.scalars().first()
+
+            articles_query = (
+                select(Article)
+                .where(
+                    (Article.districts.any(District.district.in_(instance.districts))) &
+                    (Article.created_at <= (datetime.now() + timedelta(minutes=30)))
+                )
+            )
+
+            results = await self.session.execute(articles_query.options(selectinload('*')))
+            return results.scalars().all()
+
         else:
             raise EntityDoesNotExist

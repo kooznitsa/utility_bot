@@ -17,12 +17,12 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
-    __tablename__ = 'schemas'
+    __tablename__ = 'users'
     __table_args__ = (UniqueConstraint('user_id'),)
 
     id: int | None = Field(primary_key=True, default=None)
 
-    districts: list['District'] = Relationship(back_populates='schemas', link_model=UserDistrict)
+    districts: list['District'] = Relationship(back_populates='users', link_model=UserDistrict)
 
 
 class UserCreate(UserBase):
