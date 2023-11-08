@@ -35,7 +35,7 @@ class ArticleRepository(BaseRepository):
         if district:
             query = query.where(self.model.districts.any(District.district.in_(district)))
 
-        query = query.offset(offset).limit(limit).filter(self.model.deadline >= today)
+        query = query.where(self.model.deadline >= today).offset(offset).limit(limit)
         results = await self.session.execute(query.options(selectinload('*')))
         return results.scalars().all()
 

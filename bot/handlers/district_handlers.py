@@ -11,14 +11,28 @@ from lexicon.districts import DISTRICTS
 from lexicon.lexicon_ru import LexiconRu
 from schemas.schemas import UserCreate, DistrictCreate
 from receiver.driver import GatewayAPIDriver
-from utils.async_items import AsyncItems
-from utils.get_data import get_data
+from receiver.get_data import get_data
 
 router = Router()
 
 
 class FSMDistrict(StatesGroup):
     buttons = State()
+
+
+class AsyncItemIterator:
+    def __init__(self, items):
+        self._items = iter(items)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        try:
+            item = next(self._items)
+        except StopIteration:
+            raise StopAsyncIteration
+        return item
 
 
 async def reset_buttons(state: FSMContext) -> list[int]:
@@ -62,9 +76,9 @@ async def process_start_command(message: Message, state: FSMContext) -> None:
     StateFilter(FSMDistrict.buttons),
 )
 async def process_choose_callback(
-    callback: CallbackQuery,
-    callback_data: BtnCallbackFactory,
-    state: FSMContext,
+        callback: CallbackQuery,
+        callback_data: BtnCallbackFactory,
+        state: FSMContext,
 ) -> None:
     user_data = await state.get_data()
     buttons = user_data.get('buttons')
@@ -89,30 +103,6 @@ async def process_choose_callback(
     await callback.answer(answer)
 
 
-@router.callback_query(BtnCallbackFactory.filter(F.action == 'finish'))
-async def process_finish_callback(callback: CallbackQuery, state: FSMContext) -> None:
-    user_data = await state.get_data()
-    districts = [
-        DISTRICTS[idx]
-        for idx, status in enumerate(user_data['buttons']) if status == 1
-    ]
-
-    # TODO: clear all existing user districts
-
-    async for district in AsyncItems(districts):
-        await GatewayAPIDriver.tg_district_create(
-            callback.from_user.id,
-            DistrictCreate(district),
-        )
-
-    await state.clear()
-
-    await callback.answer(
-        text=f"{LexiconRu.RESULT.value} {', '.join(districts)}",
-        show_alert=True,
-    )
-
-
 @router.callback_query(BtnCallbackFactory.filter(F.action == 'reset'))
 async def process_reset_callback(callback: CallbackQuery, state: FSMContext) -> None:
     buttons = await reset_buttons(state)
@@ -126,6 +116,35 @@ async def process_reset_callback(callback: CallbackQuery, state: FSMContext) -> 
         pass
 
     await state.clear()
+    await callback.answer()
+
+
+@router.callback_query(BtnCallbackFactory.filter(F.action == 'finish'))
+async def process_finish_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    user_data = await state.get_data()
+    districts = [
+        DISTRICTS[idx]
+        for idx, status in enumerate(user_data['buttons']) if status == 1
+    ]
+
+    await GatewayAPIDriver.tg_districts_delete(callback.from_user.id)
+
+    async for district in AsyncItemIterator(districts):
+        await GatewayAPIDriver.tg_district_create(
+            callback.from_user.id,
+            DistrictCreate(district=district),
+        )
+
+    await state.clear()
+
+    try:
+        await callback.message.edit_text(
+            text=f"{LexiconRu.RESULT.value} {', '.join(districts)}",
+            reply_markup=None,
+        )
+    except TelegramBadRequest:
+        pass
+
     await callback.answer()
 
 

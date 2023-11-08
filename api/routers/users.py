@@ -23,9 +23,9 @@ router = APIRouter(prefix='/users')
     name='create_user',
 )
 async def create_user(
-    user_create: UserCreate = Body(...),
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        user_create: UserCreate = Body(...),
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
         return await repository.create(model_create=user_create)
@@ -43,11 +43,11 @@ async def create_user(
     name='get_users',
 )
 async def get_users(
-    district: Optional[list[str]] = Query(default=None),
-    limit: int = Query(default=50, lte=100),
-    offset: int = Query(default=0),
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        district: Optional[list[str]] = Query(default=None),
+        limit: int = Query(default=50, lte=100),
+        offset: int = Query(default=0),
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> list[Optional[UserRead]]:
     return await repository.list_users(
         district=district,
@@ -63,9 +63,9 @@ async def get_users(
     name='get_user',
 )
 async def get_user(
-    user_id: int,
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        user_id: int,
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
         result = await repository.get(model_id=user_id)
@@ -83,9 +83,9 @@ async def get_user(
     name='delete_user',
 )
 async def delete_user(
-    user_id: int,
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        user_id: int,
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> None:
     try:
         await repository.get(model_id=user_id)
@@ -104,10 +104,10 @@ async def delete_user(
     name='create_user_district',
 )
 async def create_user_district(
-    user_id: int,
-    district_create: DistrictCreate = Body(...),
-    repository: DistrictRepository = Depends(get_repository(DistrictRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        user_id: int,
+        district_create: DistrictCreate = Body(...),
+        repository: DistrictRepository = Depends(get_repository(DistrictRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> DistrictRead:
     try:
         return await repository.create(
@@ -121,25 +121,22 @@ async def create_user_district(
 
 
 @router.post(
-    '/{user_id}/districts/{district_id}',
+    '/{user_id}/districts/delete',
     response_model=UserRead,
     status_code=status.HTTP_200_OK,
-    name='delete_user_district',
+    name='delete_user_districts',
 )
-async def delete_user_district(
-    user_id: int,
-    district_id: int,
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+async def delete_user_districts(
+        user_id: int,
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> UserRead:
     try:
-        return await repository.delete_district(
-            district_id=district_id, model_id=user_id
-        )
+        return await repository.delete_all_districts(model_id=user_id)
     except EntityDoesNotExist:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'User or district not found'
+            detail=f'User not found'
         )
 
 
@@ -150,9 +147,9 @@ async def delete_user_district(
     name='get_user_articles',
 )
 async def get_user_articles(
-    user_id: int,
-    repository: UserRepository = Depends(get_repository(UserRepository)),
-    api_key: APIKey = Depends(get_api_key),
+        user_id: int,
+        repository: UserRepository = Depends(get_repository(UserRepository)),
+        api_key: APIKey = Depends(get_api_key),
 ) -> list[Optional[ArticleRead]]:
     try:
         return await repository.list_articles(model_id=user_id)

@@ -16,8 +16,8 @@ class UserRepository(BaseRepository):
 
     async def _get_user(self, model_id: int):
         query = select(self.model).where(self.model.user_id == model_id)
-        result = await self.session.scalars(query.options(selectinload('*')))
-        return result.first()
+        result = await self.session.execute(query.options(selectinload('*')))
+        return result.scalars().first()
 
     async def create(self, model_create: UserCreate) -> UserRead:
         model_query = await self.session.execute(
@@ -32,10 +32,10 @@ class UserRepository(BaseRepository):
             raise EntityAlreadyExists
 
     async def list_users(
-        self,
-        limit: int = 50,
-        district: Optional[list[str]] = None,
-        offset: int = 0,
+            self,
+            limit: int = 50,
+            district: Optional[list[str]] = None,
+            offset: int = 0,
     ) -> list[UserRead]:
         query = select(self.model).order_by(self.model.pub_date.desc())
 
@@ -52,14 +52,11 @@ class UserRepository(BaseRepository):
         else:
             raise EntityDoesNotExist
 
-    async def delete_district(self, model_id: int, district_id: int) -> Optional[UserRead]:
-        district_to_delete = await self._get_instance(District, district_id)
-        instance = await self._get_user(model_id)
-
-        if instance and (district_to_delete in instance.districts):
-            instance.districts.remove(district_to_delete)
+    async def delete_all_districts(self, model_id: int) -> Optional[UserRead]:
+        if instance := await self._get_user(model_id):
+            instance.districts.clear()
             await self._add_to_db(instance)
-            return instance
+            return await self._get_user(model_id)
         else:
             raise EntityDoesNotExist
 

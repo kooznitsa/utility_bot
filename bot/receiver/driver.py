@@ -23,7 +23,7 @@ class GatewayAPIDriver:
         )
 
     class Route:
-        users: str = '/users'
+        users: str = '/users/'
 
         @staticmethod
         def get_districts_url(user_id: int):
@@ -34,16 +34,7 @@ class GatewayAPIDriver:
         return f'{cls._api_root_url}{route}'
 
     @classmethod
-    async def _post_data(cls, url: str, data) -> httpx.Response:
-        cls._log_request(url, cls._headers, data)
-
-        async with httpx.AsyncClient() as client:
-            resp = await client.post(
-                url,
-                headers=cls._headers,
-                data=data,
-            )
-
+    async def _handle_response(cls, resp: httpx.Response) -> httpx.Response:
         try:
             resp_body = resp.json()
             error = None
@@ -56,17 +47,57 @@ class GatewayAPIDriver:
         return resp
 
     @classmethod
+    async def _post_data(
+            cls,
+            url: str,
+            data: UserCreate | DistrictCreate,
+    ) -> httpx.Response:
+        cls._log_request(url, cls._headers, data)
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                url,
+                headers=cls._headers,
+                json=data.as_dict(),
+            )
+
+        return await cls._handle_response(resp)
+
+    @classmethod
     async def tg_user_create(cls, user_create: UserCreate) -> httpx.Response:
         url = await cls._build_url(cls.Route.users)
         return await cls._post_data(url, user_create)
 
     @classmethod
-    async def tg_district_create(cls, user_id: int, district_create: DistrictCreate) -> httpx.Response:
+    async def tg_district_create(
+            cls,
+            user_id: int,
+            district_create: DistrictCreate,
+    ) -> httpx.Response:
         url = await cls._build_url(cls.Route.get_districts_url(user_id))
         return await cls._post_data(url, district_create)
 
     @classmethod
-    def _log_request(cls, url: str, headers: dict[str, str], body: dict) -> None:
+    async def tg_districts_delete(cls, user_id: int) -> httpx.Response:
+        url = await cls._build_url(cls.Route.get_districts_url(user_id))
+        url = f'{url}/delete'
+        cls._log_request(url, cls._headers)
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                url,
+                headers=cls._headers,
+            )
+
+        return await cls._handle_response(resp)
+
+    @classmethod
+    def _log_request(
+            cls,
+            url: str,
+            headers: dict[str, str],
+            body: Union[None, dict, str] = None,
+    ) -> None:
         cls.logger.info(
             msg=cls.LoggerMsgTemplates.REQUEST.format(
                 url=url,
