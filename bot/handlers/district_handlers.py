@@ -152,3 +152,5 @@ async def process_finish_callback(callback: CallbackQuery, state: FSMContext) ->
 async def send_articles(message: Message):
     if data := get_data(message.from_user.id):
         await message.answer(text=data)
+    else:
+        await message.answer(text='Статьи не найдены.')

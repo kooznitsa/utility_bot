@@ -142,7 +142,7 @@ async def delete_user_districts(
 
 @router.get(
     '/{user_id}/articles',
-    response_model=ArticleRead,
+    response_model=list[Optional[ArticleRead]],
     status_code=status.HTTP_200_OK,
     name='get_user_articles',
 )

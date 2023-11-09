@@ -75,7 +75,6 @@ redis-cli
 ```
 
 **5. Start uvicorn server (API)**
-- Put venv folder inside api/
 - cd api
 - Create a virtual environment
 ```
@@ -99,13 +98,17 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 **6. Launch Celery (separate terminal tabs)**
 ```
 # Tab1: 
-poetry run celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
+cd api
+venv\Scripts\activate
+python -m celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
+
 # Tab2:
-poetry run celery -A parser.tasks beat --loglevel=info
+cd api
+venv\Scripts\activate
+python -m celery -A parser.tasks beat --loglevel=info
 ```
 
 **7. Launch bot (separate terminal tab)**
-- Put venv folder inside bot/
 - cd bot
 - Create a virtual environment
 ```
@@ -122,5 +125,5 @@ python -m poetry install
 ```
 - Launch bot
 ``` 
-python py main.py
+python main.py
 ```

@@ -61,15 +61,12 @@ class UserRepository(BaseRepository):
             raise EntityDoesNotExist
 
     async def list_articles(self, model_id: int) -> list[ArticleRead]:
-        user_query = select(self.model).where(self.model.user_id == model_id)
-
-        if instance := await self.session.execute(user_query.options(selectinload('*'))):
-            instance = instance.scalars().first()
-
+        if instance := await self._get_user(model_id):
+            districts = [i.district for i in instance.districts]
             articles_query = (
                 select(Article)
                 .where(
-                    (Article.districts.any(District.district.in_(instance.districts))) &
+                    (Article.districts.any(District.district.in_(districts))) &
                     (Article.created_at <= (datetime.now() + timedelta(minutes=30)))
                 )
             )
