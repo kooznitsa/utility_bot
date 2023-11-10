@@ -29,6 +29,10 @@ class GatewayAPIDriver:
         def get_districts_url(user_id: int):
             return f'/users/{user_id}/districts'
 
+        @staticmethod
+        def get_articles_url(user_id: int):
+            return f'/users/{user_id}/articles'
+
     @classmethod
     async def _build_url(cls, route: str) -> str:
         return f'{cls._api_root_url}{route}'
@@ -85,6 +89,32 @@ class GatewayAPIDriver:
 
         async with httpx.AsyncClient() as client:
             resp = await client.post(
+                url,
+                headers=cls._headers,
+            )
+
+        return await cls._handle_response(resp)
+
+    @classmethod
+    async def tg_articles_get(cls, user_id: int) -> httpx.Response:
+        url = await cls._build_url(cls.Route.get_articles_url(user_id))
+        cls._log_request(url, cls._headers)
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                url,
+                headers=cls._headers,
+            )
+
+        return await cls._handle_response(resp)
+
+    @classmethod
+    async def tg_users_get(cls) -> httpx.Response:
+        url = await cls._build_url(cls.Route.users)
+        cls._log_request(url, cls._headers)
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
                 url,
                 headers=cls._headers,
             )

@@ -37,7 +37,7 @@ class UserRepository(BaseRepository):
             district: Optional[list[str]] = None,
             offset: int = 0,
     ) -> list[UserRead]:
-        query = select(self.model).order_by(self.model.pub_date.desc())
+        query = select(self.model)
 
         if district:
             query = query.where(self.model.districts.any(District.district.in_(district)))
@@ -65,10 +65,8 @@ class UserRepository(BaseRepository):
             districts = [i.district for i in instance.districts]
             articles_query = (
                 select(Article)
-                .where(
-                    (Article.districts.any(District.district.in_(districts))) &
-                    (Article.created_at <= (datetime.now() + timedelta(minutes=30)))
-                )
+                .where(Article.districts.any(District.district.in_(districts)))
+                .where(Article.created_at >= (datetime.now() - timedelta(minutes=30)))
             )
 
             results = await self.session.execute(articles_query.options(selectinload('*')))

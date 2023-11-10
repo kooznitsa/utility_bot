@@ -23,8 +23,7 @@ celery_app.conf.update(
     beat_schedule={
         'scrape-articles-scheduled-task': {
             'task': 'parser.tasks.scrape_articles',
-            'schedule': crontab(minute='*/1')
-            # 'schedule': crontab(minute=0, hour='*/3,8-19')
+            'schedule': crontab(minute='*/60')
         },
         'remove-articles-scheduled-task': {
             'task': 'parser.tasks.remove_articles',

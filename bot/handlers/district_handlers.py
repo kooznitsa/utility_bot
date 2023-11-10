@@ -11,28 +11,13 @@ from lexicon.districts import DISTRICTS
 from lexicon.lexicon_ru import LexiconRu
 from schemas.schemas import UserCreate, DistrictCreate
 from receiver.driver import GatewayAPIDriver
-from receiver.get_data import get_data
+from utils.async_iterator import AsyncItemIterator
 
 router = Router()
 
 
 class FSMDistrict(StatesGroup):
     buttons = State()
-
-
-class AsyncItemIterator:
-    def __init__(self, items):
-        self._items = iter(items)
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        try:
-            item = next(self._items)
-        except StopIteration:
-            raise StopAsyncIteration
-        return item
 
 
 async def reset_buttons(state: FSMContext) -> list[int]:
@@ -146,11 +131,3 @@ async def process_finish_callback(callback: CallbackQuery, state: FSMContext) ->
         pass
 
     await callback.answer()
-
-
-@router.message()
-async def send_articles(message: Message):
-    if data := get_data(message.from_user.id):
-        await message.answer(text=data)
-    else:
-        await message.answer(text='Статьи не найдены.')

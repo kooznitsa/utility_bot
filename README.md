@@ -1,5 +1,18 @@
 # Utility bot
 
+A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia).
+
+## App structure
+
+- API (FastAPI): 
+  - Scrapes latest articles from https://gradskeinfo.rs/kategorija/servisne-info/
+  - Sends data to the database and endpoints
+- Bot (aiogram):
+  - Sends a new user to the API endpoint /users
+  - Sends districts chosen by the user to the API endpoint /users/{user_id}/districts
+  - Receives user articles from the API endpoint /users/{user_id}/articles
+  - Sends messages to users on schedule
+
 ## Database structure
 
 ![Database structure](https://raw.githubusercontent.com/kooznitsa/utility_bot/main/api/database/db_diagram.png)
@@ -58,9 +71,7 @@
 
 **2. Create utility_db database (PostgreSQL 16)**
 
-**3. Run Alembic migrations**
-
-**4. Start Redis server in Ubuntu terminal**
+**3. Start Redis server in Ubuntu terminal**
 ```
 # Once:
 sudo add-apt-repository universe
@@ -74,25 +85,24 @@ sudo service redis-server status
 redis-cli
 ```
 
-**5. Start uvicorn server (API)**
-- cd api
-- Create a virtual environment
+**4. Start uvicorn server (API)**
 ```
+cd api
+
 py -m venv venv
 venv\Scripts\activate
 # If venv\Scripts\Activate.ps1 cannot be loaded because running scripts is disabled on this system, run:
 # Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+
+py -m pip install poetry
+py -m poetry install
+
+py -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-- Install poetry
+**5. Run Alembic migrations**
 ```
-python -m pip install poetry
-python -m poetry install
-```
-
-- Start uvicorn server
-```
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+py -m poetry run alembic upgrade head
 ```
 
 **6. Launch Celery (separate terminal tabs)**
@@ -100,30 +110,23 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 # Tab1: 
 cd api
 venv\Scripts\activate
-python -m celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
+py -m celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
 
 # Tab2:
 cd api
 venv\Scripts\activate
-python -m celery -A parser.tasks beat --loglevel=info
+py -m celery -A parser.tasks beat --loglevel=info
 ```
 
 **7. Launch bot (separate terminal tab)**
-- cd bot
-- Create a virtual environment
 ```
+cd bot
+
 py -m venv venv
 venv\Scripts\activate
-# If venv\Scripts\Activate.ps1 cannot be loaded because running scripts is disabled on this system, run:
-# Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
-```
 
-- Install poetry
-```
-python -m pip install poetry
-python -m poetry install
-```
-- Launch bot
-``` 
-python main.py
+py -m pip install poetry
+py -m poetry install
+
+py main.py
 ```
