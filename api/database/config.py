@@ -24,6 +24,9 @@ class Settings(BaseConfig):
     postgres_db: str = os.environ.get('POSTGRES_DB')
     postgres_db_tests: str = os.environ.get('POSTGRES_DB_TESTS')
     db_echo_log: bool = True if os.environ.get('DEBUG') == 'True' else False
+    celery_broker_url: str = os.environ.get('CELERY_BROKER_URL')
+    celery_result_backend: str = os.environ.get('CELERY_RESULT_BACKEND')
+    timezone: str = os.environ.get('TIMEZONE')
 
     class Config:
         env_file = '.env'

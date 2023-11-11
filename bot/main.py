@@ -26,13 +26,13 @@ async def get_user_ids():
     return user_ids
 
 
-async def send_articles(dp: Dispatcher):
+async def send_articles(bot: Bot):
     user_ids = await get_user_ids()
     async for user_id in AsyncItemIterator(user_ids):
         if data := await GatewayAPIDriver.tg_articles_get(user_id):
             async for article in AsyncItemIterator(data.json()):
                 text = Formatter.format_message(article)
-                await dp.bot.send_message(user_id, text)
+                await bot.send_message(user_id, text)
 
 
 async def main():
@@ -47,7 +47,10 @@ async def main():
     await set_main_menu(bot)
 
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(send_articles, 'interval', hours=1, args=(dp,))
+    scheduler.add_job(
+        send_articles, 'cron', minute=5, hour='8-20',
+        timezone=settings.timezone, args=(bot,),
+    )
     scheduler.start()
 
     await bot.delete_webhook(drop_pending_updates=True)

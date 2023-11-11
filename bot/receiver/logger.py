@@ -13,6 +13,7 @@ def gateway_api_driver_logger_init() -> logging.Logger:
         os.makedirs(settings.logs_dir)
 
     rfh = RotatingFileHandler(
+        encoding='utf-8',
         filename=f'{settings.logs_dir}{settings.GatewayAPIDriverLogger.filename}',
         maxBytes=settings.GatewayAPIDriverLogger.max_bytes,
         backupCount=settings.GatewayAPIDriverLogger.backup_count,

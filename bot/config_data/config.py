@@ -20,6 +20,8 @@ class Settings(BaseConfig):
 
     logs_dir: str = 'logs/'
 
+    timezone: str = os.environ.get('TIMEZONE')
+
     class GatewayAPIDriverLogger:
         filename: str = 'gateway_api_driver.log'
         max_bytes: int = 5 * (1024 * 1024)

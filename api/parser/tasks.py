@@ -1,19 +1,16 @@
 from __future__ import absolute_import
 
 import asyncio
-from dotenv import load_dotenv
-import os
 
 from celery import Celery
 from celery.schedules import crontab
 
 from .manager import add_articles, delete_articles
-
-load_dotenv()
+from database.config import settings
 
 celery_app = Celery(
-    broker=os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379'),
-    backend=os.environ.get('CELERY_RESULT_BACKEND', 'redis://redis:6379'),
+    broker=settings.celery_broker_url,
+    backend=settings.celery_result_backend,
 )
 
 celery_app.conf.update(
@@ -23,17 +20,19 @@ celery_app.conf.update(
     beat_schedule={
         'scrape-articles-scheduled-task': {
             'task': 'parser.tasks.scrape_articles',
-            'schedule': crontab(minute='*/60')
+            'schedule': crontab(minute=0, hour='8-20'),
         },
         'remove-articles-scheduled-task': {
             'task': 'parser.tasks.remove_articles',
-            'schedule': crontab(hour='*/23')
+            'schedule': crontab(hour=23, minute=59),
         }
     },
     task_routes={
         'parser.tasks.scrape_articles': 'main-queue',
         'parser.tasks.remove_articles': 'main-queue',
     },
+    timezone=settings.timezone,
+    enable_utc=True,
 )
 
 

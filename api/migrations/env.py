@@ -10,9 +10,9 @@ from alembic import context
 
 from database.config import settings
 from schemas.articles import Article
-import schemas.users
+from schemas.users import User
 from schemas.districts import District
-from schemas.link_schemas import ArticleDistrict
+from schemas.link_schemas import ArticleDistrict, UserDistrict
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

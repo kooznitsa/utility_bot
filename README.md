@@ -102,7 +102,7 @@ py -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 
 **5. Run Alembic migrations**
 ```
-py -m poetry run alembic upgrade head
+python -m alembic upgrade head
 ```
 
 **6. Launch Celery (separate terminal tabs)**

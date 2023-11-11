@@ -2,11 +2,12 @@ from datetime import date
 from typing import Optional
 
 from sqlalchemy.orm import selectinload
-from sqlmodel import select, delete
+from sqlmodel import select
 
 from .base import BaseRepository
 from schemas.articles import Article, ArticleCreate, ArticleRead
 from schemas.districts import District
+from utils.async_iterator import AsyncItemIterator
 
 
 class ArticleRepository(BaseRepository):
@@ -43,5 +44,8 @@ class ArticleRepository(BaseRepository):
         return await super().get(self.model, model_id)
 
     async def delete_bunch(self):
-        query = delete(self.model).where(self.model.deadline < date.today())
-        await self.session.execute(query)
+        query = select(self.model).where(self.model.deadline < date.today())
+        articles_to_delete = await self.session.execute(query.options(selectinload('*')))
+        async for article in AsyncItemIterator(articles_to_delete.scalars().all()):
+            await self.session.delete(article)
+        await self.session.commit()
