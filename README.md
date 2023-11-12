@@ -2,6 +2,10 @@
 
 A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia).
 
+## Tech stack
+
+<img src="https://img.shields.io/badge/FastAPI-fc884d?style=for-the-badge&logo=fastapi&logoColor=black"/> <img src="https://img.shields.io/badge/Redis-fc884d?style=for-the-badge&logo=Redis&logoColor=black"/> <img src="https://img.shields.io/badge/Celery-fc884d?style=for-the-badge"/> <img src="https://img.shields.io/badge/PostgreSQL-f5df66?style=for-the-badge&logo=PostgreSQL&logoColor=black"/> <img src="https://img.shields.io/badge/AsyncIO-65a362?style=for-the-badge&logo=AsyncIO&logoColor=black"/> <img src="https://img.shields.io/badge/aiogram-65a362?style=for-the-badge&logo=aiogram&logoColor=black"/>
+
 ## App structure
 
 - API (FastAPI): 

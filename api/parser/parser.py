@@ -80,10 +80,10 @@ class Article:
 
     def get_districts(self):
         tags = [i.text for i in self.container.find('div', {'class': 'meta-tags'}).find_all('a')]
-        districts = []
+        districts = {'Нови Сад'}
 
         for word in [j for i in self.content for j in i.split()] + self.title.split() + tags:
             for start, full in DISTRICTS:
                 if word.startswith(start):
-                    districts.append(DistrictCreate(district=full))
-        return districts
+                    districts.add(DistrictCreate(district=full))
+        return list(districts)

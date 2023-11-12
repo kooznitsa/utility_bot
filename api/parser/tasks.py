@@ -24,7 +24,7 @@ celery_app.conf.update(
         },
         'remove-articles-scheduled-task': {
             'task': 'parser.tasks.remove_articles',
-            'schedule': crontab(hour=23, minute=59),
+            'schedule': crontab(hour=1, minute=1),
         }
     },
     task_routes={
