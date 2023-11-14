@@ -46,6 +46,13 @@ A Telegram bot that sends updates on water and electricity disruptions/outage in
 
 ### With Docker
 
+#### Commands to start up the project
+
+- Create network: ```docker network create my-net```
+- Build Docker containers: ```docker-compose up -d --build```
+
+#### List of all commands
+
 - Docker:
   - Create network: ```docker network create my-net```
   - Build Docker containers: ```docker-compose up -d --build```
@@ -106,6 +113,7 @@ py -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 
 **5. Run Alembic migrations**
 ```
+python -m alembic stamp head
 python -m alembic upgrade head
 ```
 

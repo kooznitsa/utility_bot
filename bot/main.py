@@ -48,7 +48,8 @@ async def main():
 
     scheduler = AsyncIOScheduler()
     scheduler.add_job(
-        send_articles, 'cron', minute=5, hour='8-20',
+        send_articles, 'cron',
+        minute=5, hour='8-20', day_of_week='mon-fri',
         timezone=settings.timezone, args=(bot,),
     )
     scheduler.start()
