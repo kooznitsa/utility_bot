@@ -67,6 +67,8 @@ class UserRepository(BaseRepository):
                 select(Article)
                 .where(Article.districts.any(District.district.in_(districts)))
                 .where(Article.created_at >= (datetime.now() - timedelta(minutes=30)))
+                .distinct()
+                .order_by(Article.created_at)
             )
 
             results = await self.session.execute(articles_query.options(selectinload('*')))
