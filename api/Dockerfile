@@ -10,8 +10,6 @@ COPY ./pyproject.toml ./poetry.lock* ./
 
 RUN pip install poetry
 RUN poetry install
-RUN poetry run alembic stamp head
-RUN poetry run alembic upgrade head
 
 COPY . ./
 
