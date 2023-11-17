@@ -12,6 +12,7 @@ pydantic-settings = "^2.0.3"
 aioredis = "^2.0.1"
 redis = "^5.0.1"
 apscheduler = "^3.10.4"
+httpx = "^0.25.1"
 
 
 [build-system]
