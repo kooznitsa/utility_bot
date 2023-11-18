@@ -1,6 +1,8 @@
 # Utility bot
 
-A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia).
+![Static Badge](https://img.shields.io/badge/production-finished-blue)
+
+A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia). Telegram address: @ns_utility_bot.
 
 ## Tech stack
 
@@ -46,39 +48,35 @@ A Telegram bot that sends updates on water and electricity disruptions/outage in
 
 ### With Docker
 
-#### Commands to start up the project
+1. Create network: ```docker network create my-net```
 
-- Create network: ```docker network create my-net```
-- Build Docker containers: ```docker-compose up -d --build```
+2. Build Docker containers: ```docker-compose up -d --build```
 
-#### List of all commands
-
-- Docker:
-  - Create network: ```docker network create my-net```
-  - Build Docker containers: ```docker-compose up -d --build```
-  - Remove Docker containers: ```docker-compose down```
-  - Bring down the existing containers and volumes: ```docker-compose down -v```
-
-- Alembic:
+3. Run Alembic migrations:
   - Initialize Alembic: ```docker exec -it fastapi_service poetry run alembic init -t async migrations```
   - Generate a migration file: ```docker exec -it fastapi_service poetry run alembic revision --autogenerate -m "init"```
   - Apply the migration: ```docker exec -it fastapi_service poetry run alembic upgrade head```
 
-- Database:
+API will be available at http://127.0.0.1:8000/docs.
+
+4. Other useful commands:
   - Display a table: ```docker exec -it db_postgres psql -U postgres utility_db -c "SELECT * FROM public.articles"```
+  - Remove Docker containers: ```docker-compose down``` or bring down the existing containers and volumes: ```docker-compose down -v```
 
 ### Without Docker
 
 **1. Edit .env**
 ```
-| With Docker                                              | Without Docker                                 |
-|----------------------------------------------------------|------------------------------------------------|
-| POSTGRES_SERVER=db_potgres                               | POSTGRES_SERVER=localhost                      |
-| CELERY_BROKER_URL='redis://redis:6379'                   | CELERY_BROKER_URL='redis://127.0.0.1:6379'     |
-| CELERY_RESULT_BACKEND='redis://redis:6379'               | CELERY_RESULT_BACKEND='redis://127.0.0.1:6379' |
-| REDIS_URL='redis://redis:6379'                           | REDIS_URL='redis://127.0.0.1:6379'             |
-| GW_ROOT_URL='fastapi_service://fastapi_service:8000/api' | GW_ROOT_URL='http://127.0.0.1:8000/api'        |
+| With Docker                                            | Without Docker                               |
+|--------------------------------------------------------|----------------------------------------------|
+| POSTGRES_SERVER=db_potgres                             | POSTGRES_SERVER=localhost                    |
+| CELERY_BROKER_URL=redis://redis:6379                   | CELERY_BROKER_URL=redis://127.0.0.1:6379     |
+| CELERY_RESULT_BACKEND=redis://redis:6379               | CELERY_RESULT_BACKEND=redis://127.0.0.1:6379 |
+| REDIS_URL=redis://redis:6379                           | REDIS_URL=redis://127.0.0.1:6379             |
+| GW_ROOT_URL=fastapi_service://fastapi_service:8000/api | GW_ROOT_URL=http://127.0.0.1:8000/api        |
 ```
+
+NOTE: For production with Docker use ```GW_ROOT_URL=http://fastapi_service:8000/api```.
 
 **2. Create utility_db database (PostgreSQL 16)**
 
@@ -111,26 +109,15 @@ py -m poetry install
 py -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
+API will be available at http://127.0.0.1:8000/docs.
+
 **5. Run Alembic migrations**
-```
-python -m alembic stamp head
-python -m alembic upgrade head
-```
+- Initialize Alembic: ```python -m alembic init -t async migrations```
+- Generate a migration file: ```python -m alembic revision --autogenerate -m "init"```
+- Or, with existing migrations: ```python -m alembic stamp head```
+- Apply the migrations: ```python -m alembic upgrade head```
 
-**6. Launch Celery (separate terminal tabs)**
-```
-# Tab1: 
-cd api
-venv\Scripts\activate
-py -m celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
-
-# Tab2:
-cd api
-venv\Scripts\activate
-py -m celery -A parser.tasks beat --loglevel=info
-```
-
-**7. Launch bot (separate terminal tab)**
+**6. Launch bot (separate terminal tab)**
 ```
 cd bot
 
@@ -141,4 +128,17 @@ py -m pip install poetry
 py -m poetry install
 
 py main.py
+```
+
+**7. Launch Celery (separate terminal tabs)**
+```
+# Tab1: 
+cd api
+venv\Scripts\activate
+py -m celery -A parser.tasks worker --pool=solo -l info -Q main-queue -c 1
+
+# Tab2:
+cd api
+venv\Scripts\activate
+py -m celery -A parser.tasks beat --loglevel=info
 ```

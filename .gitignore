@@ -62,6 +62,9 @@ coverage.xml
 *.log
 logs/
 
+# FastAPI migrations:
+migrations/
+
 # Django stuff:
 local_settings.py
 db.sqlite3
