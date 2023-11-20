@@ -54,6 +54,7 @@ services:
         - db_postgres
         - fastapi_service
         - redis
+      restart: unless-stopped
       env_file:
         - .env
       command: 'poetry run celery -A parser.tasks worker --beat -l info -Q main-queue -c 1'
