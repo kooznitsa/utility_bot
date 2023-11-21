@@ -23,7 +23,7 @@ class Article(ArticleBase, table=True):
     __table_args__ = (UniqueConstraint('url'),)
 
     id: int | None = Field(primary_key=True, default=None)
-    created_at: datetime = datetime.now()
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
     districts: list['District'] = Relationship(back_populates='articles', link_model=ArticleDistrict)
 
