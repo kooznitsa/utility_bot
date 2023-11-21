@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
