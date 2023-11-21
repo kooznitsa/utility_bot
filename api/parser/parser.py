@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import re
 from urllib.request import urlopen, Request
 
@@ -76,6 +76,7 @@ class Article:
             deadline=self.get_deadline(self.pub_date, self.title),
             url=self.url,
             pub_date=self.pub_date,
+            created_at=datetime.now(),
         )
 
     def get_districts(self):

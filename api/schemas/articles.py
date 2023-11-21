@@ -14,6 +14,7 @@ class ArticleBase(SQLModel):
     url: str
     title: str
     content: str
+    created_at: datetime
     pub_date: date = Field(index=True)
     deadline: date = Field(index=True)
 
@@ -23,7 +24,7 @@ class Article(ArticleBase, table=True):
     __table_args__ = (UniqueConstraint('url'),)
 
     id: int | None = Field(primary_key=True, default=None)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    # created_at: datetime = Field(default_factory=datetime.utcnow)
 
     districts: list['District'] = Relationship(back_populates='articles', link_model=ArticleDistrict)
 
