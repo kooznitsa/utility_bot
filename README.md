@@ -69,7 +69,7 @@ API will be available at http://127.0.0.1:8000/docs.
 ```
 | With Docker                                            | Without Docker                               |
 |--------------------------------------------------------|----------------------------------------------|
-| POSTGRES_SERVER=db_potgres                             | POSTGRES_SERVER=localhost                    |
+| POSTGRES_SERVER=db_postgres                            | POSTGRES_SERVER=localhost                    |
 | CELERY_BROKER_URL=redis://redis:6379                   | CELERY_BROKER_URL=redis://127.0.0.1:6379     |
 | CELERY_RESULT_BACKEND=redis://redis:6379               | CELERY_RESULT_BACKEND=redis://127.0.0.1:6379 |
 | REDIS_URL=redis://redis:6379                           | REDIS_URL=redis://127.0.0.1:6379             |
