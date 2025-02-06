@@ -2,7 +2,9 @@
 
 ![Static Badge](https://img.shields.io/badge/production-finished-blue)
 
-A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia). Telegram address: @ns_utility_bot.
+A Telegram bot that sends updates on water and electricity disruptions/outage in Novi Sad and its vicinity (Serbia).
+
+<!---- Telegram address: @ns_utility_bot. -->
 
 ## Tech stack
 
